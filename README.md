@@ -6,6 +6,7 @@ Repositório do Exercício-Programa 1 da disciplina de Bioestatística II (mestr
 
 - `Banco aulas 2026.xlsx` — banco usado nas aulas (3.000 indivíduos, 16 variáveis).
 - `ep01_paulo_pimenta_MOD.R` — script com a análise do EP1.
+- `Exercícios programa de avaliação 2026.pdf` — enunciado do EP1.
 - `README.md` — este arquivo.
 
 ## Como executar
@@ -37,7 +38,7 @@ O script:
 
 ## Observação
 
-O PDF do enunciado não é redistribuído neste repositório por conter dados de contato do professor.
+O PDF do enunciado também está incluído neste repositório.
 
 ## Autor
 
