@@ -17,8 +17,10 @@ Repositório do Exercício-Programa 1 da disciplina de Bioestatística II (mestr
    install.packages("readxl")
    ```
 
-3. Mantenha o arquivo `Banco aulas 2026.xlsx` na mesma pasta do script.
-4. Execute o script.
+3. No RStudio, defina o diretório de trabalho para a pasta do script:
+   `Session > Set Working Directory > To Source File Location`.
+4. Mantenha o arquivo `Banco aulas 2026.xlsx` na mesma pasta do script.
+5. Execute o script.
 
 O script cria as pastas `resultados/`, `resultados/graficos/` e `resultados/tabelas/` e imprime os resultados no console.
 
