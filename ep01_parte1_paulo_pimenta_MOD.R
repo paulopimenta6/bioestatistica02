@@ -1,33 +1,24 @@
-# Paulo Pimenta
-# Bioestatística II — EP1 — 2026
 #===============================================================================
-### Leitura do banco no diretório do repositório
-# Execute este script com o arquivo "Banco aulas 2026.xlsx" na mesma pasta.
-#===============================================================================
-### Criando diretórios para salvar os resultados
-#===============================================================================
-### Criando diretórios para armazenar os resultados obtidos
-dir.create("resultados", showWarnings = FALSE)
-dir.create("resultados/graficos", showWarnings = FALSE)
-dir.create("resultados/tabelas", showWarnings = FALSE)
+### EP 01
+### Alunos
+### Paulo Henrique de Almeida Soares Pimenta,NUSP:7599770
+### Fernanda Miwa Yamasaka,NUSP:11923084
 #===============================================================================
 
 #===============================================================================
 ### Carregando bibliotecas necessárias
 library(readxl)
+library(dplyr)
 #===============================================================================
 
 #===============================================================================
 # [1] Leitura do banco
-dados <- as.data.frame(
-  readxl::read_excel("Banco aulas 2026.xlsx", sheet = 1)
-)
-
+dados <- as.data.frame(readxl::read_excel("Banco aulas 2026.xlsx", sheet = 1))
 ##==============================================================================
-### Analise dos dados antes da tabela ter os dados de hipertensao e diabetes 
-### criados
+### Analise dos dados antes da tabela ter os dados de hipertensao e diabetes serem criados
 ##==============================================================================
 dim(dados)
+dplyr::glimpse(dados)
 summary(dados)
 ### Ajuste em algumas variaveis que serão usadas em exercícios futuros
 #unique(dados$ESCOLARIDADE)
@@ -35,12 +26,10 @@ dados$ESCOLARIDADE <- factor(dados$ESCOLARIDADE, levels = c("Sem escola formal",
                                                             "Graduado"), ordered = TRUE)
 dados$SEXO <- factor(dados$SEXO)
 #===============================================================================
-
-#===============================================================================
 # [2] Criando as variáveis diabetes e hipertensão usando ifelse 
 ### Quando uma variável atender o requisito com | "ou", logo será sim, caso 
 ### contrário sera não. Em casos em que ocorra NA e nenhum criterio seja aceito
-### sera NA, pois o "Não" usa o condicional $ "e".
+### sera NA, pois o "Não" usa o condicional & "e".
 dados$HIPERTENSAO <- ifelse(
   dados$HASTRAT == "Sim" | dados$PAS >= 140 | dados$PAD >= 90,
   "Sim", "Não"
@@ -50,7 +39,6 @@ dados$DIABETES <- ifelse(
     dados$HBGLIC >= 6.5 | dados$TTOG >= 200,
   "Sim", "Não"
 )
-
 ##==============================================================================
 ### Analise dos dados depois da tabela ter os dados de hipertensao e diabetes 
 ### criados
@@ -58,19 +46,15 @@ dados$DIABETES <- ifelse(
 dim(dados)
 summary(dados)
 #===============================================================================
-
-#===============================================================================
 # [3] Criando tabela descritiva
 homens <- subset(dados, SEXO == "M")
 mulheres <- subset(dados, SEXO == "F")
 var_numec <- c("IDADE", "PAS", "PAD", "GLIC", "HBGLIC", "TTOG",
                "LDL", "HDL", "PCR")
-
 #===============================================================================
 ### Para variáveis numéricas é preciso fazer as verificações de normalidade e 
 ### como os dados são abaixo de 5000 usarei, inicialmente o tste de Shapiro-Wilk
 #===============================================================================
-
 normalidade <- data.frame()
 for (v in var_numec) {
   p_homens <- shapiro.test(na.omit(homens[[v]]))$p.value
@@ -84,7 +68,6 @@ for (v in var_numec) {
 #===============================================================================
 # Exibindo a normalidade
 print(normalidade)
-
 #===============================================================================
 ### Variavel p.value.Homens p.value.Mulheres
 ### 1    IDADE   5.862784e-22     6.862515e-22
@@ -96,8 +79,6 @@ print(normalidade)
 ### 7      LDL   2.012727e-01     1.428855e-01
 ### 8      HDL   1.377695e-02     3.129716e-03
 ### 9      PCR   8.182283e-44     8.146625e-44
-#===============================================================================
-
 #===============================================================================
 ### Histogramas e Q-Q plot
 ### as classes usam por padrão o método de Sturges)
@@ -136,7 +117,6 @@ for (v in var_numec) {
     dnorm(mean(xh), mean(xh), sd(xh)),
     dnorm(mean(xm), mean(xm), sd(xm))
   )
-
 
   # Organização: 4 gráficos + 1 legenda
   layout(matrix(c(1, 2, 3, 4, 5, 5),
@@ -212,13 +192,10 @@ for (v in var_numec) {
          horiz = TRUE,
          bty = "n",
          cex = 0.85)
-
   }
-
 # Restaurar layout padrão
 layout(1)
 par(mfrow = c(1, 1))
-
 #===============================================================================
 ### Somente LDL tem p >= 0,05 nos dois sexos: 0,20127 e 0,14289.
 ### Nas demais variaveis, pelo menos um grupo tem p < 0,05.
@@ -234,10 +211,14 @@ par(mfrow = c(1, 1))
 #===============================================================================
 # Testes bilaterais; alfa = 0,05; participantes independentes.
 # As escolhas abaixo sao especificas deste banco e dos diagnosticos acima.
-# Teste t de Welch (nao exige variancias iguais).
+# Comparação das médias entre grupos independentes.
+# O teste t de Welch não exige variâncias iguais.
+# O tamanho amostral elevado favorece sua robustez a desvios
+# moderados da normalidade.
 ### LDL
 # p-value = 0,4942. Nao foi detectada diferenca entre as medias de LDL.
-# Aceita-se H0
+# Não rejeitamos H0.
+# Não encontramos evidência de diferença entre as médias de LDL.
 teste_ldl <- t.test(homens$LDL, mulheres$LDL, paired = FALSE)
 print(teste_ldl)
 ### PAS
@@ -324,6 +305,15 @@ for (v in var_numec) {
     eps = 0.001
   )
   
+  # Definir em qual das três linhas aparecerá o p-valor.
+  # Welch: linha da média.
+  # Mann-Whitney: linha da mediana e dos quartis.
+  if (v %in% c("LDL", "PAS", "PAD")) {
+    coluna_p <- c(p, "", "")
+  } else {
+    coluna_p <- c("", p, "")
+  }
+  
   tabela <- rbind(
     tabela,
     data.frame(
@@ -351,16 +341,20 @@ for (v in var_numec) {
         )
       ),
       
-      p_valor = c(p, "", "")
+      # p_valor = c(p, "", "")
+      # Colocar o p-valor junto ao resumo principal da variável.
+      
+      ### Usar aqui o vetor definido antes do rbind().
+      p_valor = coluna_p
+      
     )
   )
 }
-
 # Mostra a tabela completa
 print(tabela, row.names = FALSE)
 
-# Opcional: abre a tabela em uma aba no RStudio
-# View(tabela)
+### Opcional: abre a tabela em uma aba no RStudio
+### View(tabela)
 
 #===============================================================================
 ### Variaveis categóricas
@@ -376,7 +370,7 @@ testes_categoricas <- c()
 for (v in var_categ) {
   contagens <- table(dados[[v]], factor(dados$SEXO, levels = c("M", "F")))
   porcentagens <- 100 * prop.table(contagens, margin = 2)
-  p <- NA_real_
+  p <- NA
   nome_teste <- "Nao se aplica"
   if (v != "SEXO") {
     teste <- suppressWarnings(chisq.test(contagens, correct = FALSE))
@@ -402,10 +396,7 @@ for (v in var_categ) {
     Mulheres = as.character(sum(is.na(mulheres[[v]]))), p_valor = ""))
 }
 
-
 print(tabela, row.names = FALSE)
-
-
 #===============================================================================
 # [4] TABELA SUPLEMENTAR 
 #===============================================================================
@@ -422,16 +413,20 @@ print(tabela, row.names = FALSE)
 #===============================================================================
 suplementar <- data.frame(
   Variavel = c(var_numec, var_categ),
-  Resumo = c(ifelse(var_numec == "LDL", "Media (DP)",
-                    "Mediana [P25; P75]"), rep("n (% dos validos)", 8)),
-  Teste = c(ifelse(var_numec == "LDL", "t de Welch", "Mann-Whitney"),
-            testes_categoricas),
+  
+  Resumo = c(ifelse(var_numec %in% c("LDL", "PAS", "PAD"), "Media (DP)", "Mediana [P25; P75]"), rep("n (% dos validos)", 8)),
+  
+  Teste = c(ifelse(var_numec %in% c("LDL", "PAS", "PAD"), "t de Welch", "Mann-Whitney"), testes_categoricas),
+  
   Justificativa = c(
-    ifelse(var_numec == "LDL", "Shapiro >= 0,05 nos dois grupos",
-           "Shapiro < 0,05 em pelo menos um grupo"),
+    ifelse(var_numec == "LDL", "Shapiro-Wilk >= 0,05 nos dois grupos",
+           ifelse(var_numec %in% c("PAS", "PAD"), paste("Distribuicao aproximadamente normal pela inspecao", 
+                                                        "dos histogramas por sexo, apesar de Shapiro-Wilk < 0,05"),
+             "Shapiro-Wilk < 0,05 em pelo menos um grupo")),
     "SEXO define os grupos; nao recebe teste",
     rep("Categorias; todas as contagens esperadas >= 5", 7)))
-print(suplementar, row.names = FALSE)
+
+print(suplementar, row.names = FALSE, width = 180)
 
 #===============================================================================
 # [5a] IC95% da média de PAD
@@ -505,8 +500,10 @@ print(100 * c(Proporcao = soma_primeiro_grau / soma_total_muleheres,
 # [6b] IC99% da idade que nunca fumou
 #===============================================================================
 ### subset exclui os valores NAs
+# Selecionar quem nunca fumou.
 nunca_fumaram <- subset(dados, TABAGISMO == "Nunca")
-media_idade <- mean(nunca_fumaram$IDADE)
+# Calcular a média entre as idades conhecidas.
+media_idade <- mean(nunca_fumaram$IDADE, na.rm = TRUE)
 ic_idade <- t.test(nunca_fumaram$IDADE, conf.level = 0.99)$conf.int
 print(media_idade)
 print(ic_idade)
@@ -532,3 +529,7 @@ item7 <- data.frame(
   TTOG_hipertensos = estatisticas(hipertensos$TTOG))
 print(round(item7, 4))
 # DP e variancia amostrais usam n-1. Quantis usam type = 7, padrao do R.
+#===============================================================================
+# [8] Executar o arquivo que gera o relatório Word.
+source("bloco_8_gerar_word_EP01.R", encoding = "UTF-8")
+#===============================================================================
