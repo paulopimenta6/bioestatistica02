@@ -2,7 +2,9 @@
 
 Análises desenvolvidas para praticar estatística descritiva, inferência estatística e criação de variáveis em R, com código comentado e construção passo a passo.
 
-O projeto reúne o **Exercício-programa 1**, com comparação de características entre homens e mulheres, e o **Exercício-programa 2 — versão A**, com cálculo do risco de doença arterial coronariana em 10 anos pelo sistema de pontos de Framingham baseado em LDL.
+O projeto reúne o **Exercício-programa 1**, com comparação de características entre homens e mulheres, e o **Exercício-programa 2**, nas versões **A** (risco de doença arterial coronariana em 10 anos pelo sistema de pontos de Framingham baseado em LDL) e **B** (classificação de condutas para hipertensão, diabetes e dislipidemia segundo o enunciado).
+
+As três análises foram concluídas. Os resultados apresentados abaixo foram conferidos nas execuções dos scripts, e os arquivos de saída foram gerados.
 
 ## Objetivos de aprendizagem
 
@@ -58,6 +60,58 @@ Todos os participantes são mantidos no banco. As pontuações de cada component
 
 A variável final de risco é textual para preservar valores como `"7%"` e `">=56%"`. Os valores ausentes são `NA`, e não a palavra `"NA"` usada como categoria durante os cálculos.
 
+## Exercício-programa 2 — versão B
+
+A versão B cria três variáveis de conduta para os 3.000 participantes: `CONDUTA_HAS`, `CONDUTA_DM` e `CONDUTA_DLP`. As regras são as fornecidas pelo exercício; o artigo de Wilson e a página de Framingham fundamentam a versão A.
+
+### Hipertensão — `CONDUTA_HAS`
+
+| Situação | Meta de PAS (mmHg) | Meta de PAD (mmHg) |
+|---|---|---|
+| Com diabetes, independentemente da idade | < 130 | < 80 |
+| Sem diabetes, idade < 60 anos | < 140 | < 90 |
+| Sem diabetes, idade >= 60 anos | < 150 | < 90 |
+
+**Esclarecimento do professor:** a última faixa inclui exatamente 60 anos. Embora o enunciado original indique “maior que 60”, foi confirmado o uso de `IDADE >= 60`.
+
+As duas pressões devem estar abaixo dos limites. Dentro da meta, a classificação é “manter conduta”. Fora dela, `HASTRAT` determina “introduzir medicamento” para quem não está em tratamento ou “aumentar dose” para quem já está.
+
+### Diabetes — `CONDUTA_DM`
+
+Estar dentro da meta exige simultaneamente `GLIC < 130` mg/dL e `HBGLIC < 7`%. Dentro da meta, a classificação é “manter conduta”. Fora dela, `DIABTRAT` define “introduzir medicamento” ou “aumentar dose”.
+
+A avaliação é feita para todos os participantes. Diagnóstico de diabetes e cumprimento da meta são informações distintas: uma pessoa com diabetes pode apresentar os dois exames dentro dos limites.
+
+### Dislipidemia — `CONDUTA_DLP`
+
+| Sexo | Diabetes ou história de DAC | Meta de LDL (mg/dL) | Meta de HDL (mg/dL) |
+|---|---|---|---|
+| Masculino | Pelo menos um positivo | < 100 | > 40 |
+| Feminino | Pelo menos um positivo | < 100 | > 50 |
+| Masculino | Ambos negativos | < 130 | > 40 |
+| Feminino | Ambos negativos | < 130 | > 50 |
+
+A conduta combina os dois exames:
+
+- **Manter conduta:** LDL e HDL atendem simultaneamente às metas.
+- **Introduzir medicamento:** LDL mais de 30 mg/dL acima do limite ou HDL mais de 10 mg/dL abaixo do limite.
+- **Orientar dieta e atividade física:** fora da meta, com excesso de LDL de no máximo 30 e déficit de HDL de no máximo 10 mg/dL.
+
+Os desvios são calculados com direção: `LDL - META_LDL` e `META_HDL - HDL`. Não se utiliza valor absoluto, pois um HDL acima do limite não representa déficit. Exatamente 30 acima no LDL ou 10 abaixo no HDL ainda pertence à orientação de dieta e atividade física, desde que o outro desvio também não ultrapasse seu limite.
+
+### Resultados conferidos
+
+| Conduta | Hipertensão | Diabetes | Dislipidemia |
+|---|---:|---:|---:|
+| Manter conduta | 1.425 | 2.109 | 561 |
+| Introduzir medicamento | 1.015 | 605 | 528 |
+| Aumentar dose | 179 | 78 | Não se aplica |
+| Orientar dieta e atividade física | Não se aplica | Não se aplica | 1.535 |
+| Ausente (`NA`) | 381 | 208 | 376 |
+| **Total** | **3.000** | **3.000** | **3.000** |
+
+As contagens de hipertensão incorporam a correção para idade `>= 60`. O CSV mantém o banco original e acrescenta diagnósticos, limites de metas, verificações e condutas.
+
 ## Arquivos e organização
 
 Os nomes abaixo correspondem aos usados durante o desenvolvimento. Se os scripts forem renomeados, ajuste as chamadas correspondentes.
@@ -67,9 +121,11 @@ Os nomes abaixo correspondem aos usados durante o desenvolvimento. Se os scripts
 | `ep01.R` | Script principal do exercício 1 |
 | `bloco_8_gerar_word_EP01.R` | Formatação e geração do relatório Word |
 | `exercicio_2A.r` | Script do exercício 2, versão A |
+| `exercicio_2B.r` | Script do exercício 2, versão B |
 | `Banco aulas 2026.xlsx` | Arquivo de entrada esperado pelos scripts; necessário para reproduzir a análise |
 | `EP01_relatorio.docx` | Relatório gerado pelo exercício 1 |
 | `banco_EP2A.csv` | Banco exportado com as novas variáveis do exercício 2 A |
+| `banco_EP2B.csv` | Banco exportado com metas e condutas do exercício 2 B |
 
 A presença do banco no repositório não é pressuposta: a execução depende de uma cópia local do arquivo de entrada, com as colunas e categorias esperadas. As contagens acima descrevem o banco utilizado neste estudo.
 
@@ -80,8 +136,10 @@ A presença do banco no repositório não é pressuposta: a execução depende d
 Use R e, opcionalmente, RStudio. Instale os pacotes uma única vez:
 
 ```r
-install.packages(c("readxl", "dplyr", "officer", "flextable"))
+install.packages(c("readxl", "dplyr", "officer", "flextable", "pacman"))
 ```
+
+O script da versão B utiliza também `pacman::p_load()` para carregar os pacotes.
 
 ### 2. Conferir a pasta de trabalho
 
@@ -130,15 +188,55 @@ Elegivel FALSE TRUE
 
 O CSV é exportado em UTF-8, com vírgulas como separadores, ponto decimal e `NA` para valores ausentes. Uma nova exportação substitui o arquivo de mesmo nome na pasta de trabalho.
 
+### 5. Executar o exercício 2 B
+
+Execute o script completo na ordem, começando pela importação da planilha original. Não aplique as exclusões de elegibilidade da versão A à versão B.
+
+As etapas criam os diagnósticos, definem as metas, verificam seu cumprimento e atribuem as três condutas. Ao final, confira:
+
+```r
+nrow(dados)
+table(dados$CONDUTA_HAS, useNA = "ifany")
+table(dados$CONDUTA_DM, useNA = "ifany")
+table(dados$CONDUTA_DLP, useNA = "ifany")
+```
+
+A exportação salva o banco completo:
+
+```r
+write.csv(
+  dados,
+  file = "banco_EP2B.csv",
+  row.names = FALSE,
+  na = "NA",
+  fileEncoding = "UTF-8"
+)
+
+file.exists("banco_EP2B.csv")
+getwd()
+```
+
+A confirmação esperada é `TRUE`. O arquivo é salvo na pasta de trabalho e substituído quando a exportação é executada novamente.
+
 ## Tratamento dos dados ausentes
 
 Para os diagnósticos derivados, um critério positivo conhecido permite classificar o participante como `"Sim"`, mesmo que outro critério esteja ausente. A classificação `"Não"` exige que todos os critérios necessários sejam conhecidos e negativos.
 
 Na análise descritiva, os denominadores das porcentagens consideram os valores conhecidos de cada variável. Os intervalos de proporções usam os participantes classificáveis. Portanto, a generalização depende do desenho amostral e do mecanismo de ausência dos dados.
 
-## Próxima etapa de estudo
+Na versão B, valores ausentes não são convertidos em respostas negativas. Quando um critério conhecido basta para definir a ação, a classificação é possível mesmo com outra informação ausente. Por exemplo, um déficit de HDL superior a 10 mg/dL permite classificar “introduzir medicamento” mesmo sem uma meta de LDL conhecida.
 
-A versão B do exercício 2 será retomada em estudo guiado, com foco na construção e explicação das variáveis `CONDUTA_HAS`, `CONDUTA_DM` e `CONDUTA_DLP`, conforme as regras do enunciado.
+Se a pressão está fora da meta, mas `HASTRAT` é desconhecido, `CONDUTA_HAS` permanece `NA`: falta informação para escolher entre introduzir medicamento e aumentar a dose. Dentro da meta, essa informação não é necessária para “manter conduta”.
+
+A implementação determina as metas antes de compará-las aos exames. Quando uma meta necessária não pode ser definida, ela permanece `NA`; o código não tenta deduzir a conduta comparando todas as metas possíveis. Por isso, as contagens de ausentes correspondem a esse procedimento documentado.
+
+## Entregáveis
+
+- **Exercício 1:** script R e relatório Word com tabelas e resultados.
+- **Exercício 2 A:** script R e CSV com o banco e as novas variáveis.
+- **Exercício 2 B:** script R e CSV com o banco e as novas variáveis.
+
+O enunciado permite escolher uma das versões do exercício 2 para entrega. Ambas foram desenvolvidas aqui para praticar a sintaxe e a implementação das regras.
 
 ## Referências
 
@@ -148,7 +246,16 @@ A versão B do exercício 2 será retomada em estudo guiado, com foco na constru
 
 ## Autoria
 
+**Exercício 1 e exercício 2 A:**
+
 - Paulo Henrique de Almeida Soares Pimenta
 - Fernanda Miwa Yamasaka
+- Rebeca Benevides Pinto
+
+**Exercício 2 B:**
+
+- Paulo Henrique de Almeida Soares Pimenta
+- Fernanda Miwa Yamasaka
+- Rebeca Benevides Pinto
 
 Projeto de finalidade educacional, desenvolvido para praticar programação e interpretação estatística conforme os exercícios propostos.
