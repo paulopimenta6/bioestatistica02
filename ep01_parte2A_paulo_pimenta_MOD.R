@@ -3,12 +3,17 @@
 ### Alunos
 ### Paulo Henrique de Almeida Soares Pimenta,NUSP:7599770
 ### Fernanda Miwa Yamasaka,NUSP:11923084
+### Rebeca Benevides Pinto,NUSP:15305032
 #===============================================================================
 
 #===============================================================================
 ### Carregando bibliotecas necessárias
-library(readxl)
-library(dplyr)
+### Carregando bibliotecas necessárias
+if(!require(pacman)){
+  install.packages("pacman")
+}
+library(pacman)
+pacman::p_load(dplyr, readxl)
 #===============================================================================
 
 #===============================================================================
