@@ -14,7 +14,9 @@ if(!require(pacman)){
 library(pacman)
 pacman::p_load(dplyr, readxl)
 #===============================================================================
-
+## Criar a pasta na pasta de trabalho do R.
+## Se ela já existir, não mostrar aviso.
+dir.create("graficos_EP01", showWarnings = FALSE)
 #===============================================================================
 # [1] Leitura do banco
 dados <- as.data.frame(readxl::read_excel("Banco aulas 2026.xlsx", sheet = 1))
@@ -122,6 +124,22 @@ for (v in var_numec) {
     dnorm(mean(xm), mean(xm), sd(xm))
   )
 
+    # Nome do arquivo, usando o nome da variável.
+  arquivo_grafico <- file.path(
+    "graficos_EP01",
+    paste0("distribuicao_", v, ".png")
+  )
+
+  # Abrir o arquivo que receberá os gráficos desta variável.
+  png(
+    filename = arquivo_grafico,
+    width = 10,
+    height = 9,
+    units = "in",
+    res = 300,
+    bg = "white"
+  )
+
   # Organização: 4 gráficos + 1 legenda
   layout(matrix(c(1, 2, 3, 4, 5, 5),
                 nrow = 3, byrow = TRUE),
@@ -196,6 +214,8 @@ for (v in var_numec) {
          horiz = TRUE,
          bty = "n",
          cex = 0.85)
+  # Fechar o arquivo gráfico e concluir sua gravação.
+  dev.off()
   }
 # Restaurar layout padrão
 layout(1)
