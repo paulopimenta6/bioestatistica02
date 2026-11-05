@@ -8,7 +8,6 @@
 
 #===============================================================================
 ### Carregando bibliotecas necessárias
-### Carregando bibliotecas necessárias
 if(!require(pacman)){
   install.packages("pacman")
 }

@@ -1,11 +1,15 @@
+#===============================================================================
 # [8] GERAR O RELATORIO WORD DO EXERCICIO 1
 # Cole este bloco no FINAL do script, depois do item [7].
 # Execute os itens anteriores primeiro: este bloco usa os resultados calculados.
 # Instale estes pacotes uma unica vez, se necessario:
 # install.packages(c("officer", "flextable"))
-library(officer)
-library(flextable)
-
+if(!require(pacman)){
+  install.packages("pacman")
+}
+library(pacman)
+pacman::p_load(flextable, officer)
+#===============================================================================
 # 8.1 Preparar copias das tabelas para apresentacao.
 # As tabelas e os calculos originais nao sao alterados.
 tabela_word <- tabela
@@ -14,7 +18,7 @@ tabela_word[[4]][is.na(tabela_word[[4]])] <- "—"
 
 suplementar_word <- suplementar
 names(suplementar_word) <- c("Variável", "Resumo principal", "Teste", "Justificativa")
-
+#===============================================================================
 # Intervalos: os percentuais sao multiplicados por 100.
 # Os limites sao retirados dos objetos calculados anteriormente.
 intervalos_word <- data.frame(
@@ -43,7 +47,7 @@ for (j in 2:4) {
 }
 names(item7_word) <- c("Medida", "HbA1c (%)", "HDL — mulheres (mg/dL)",
                        "TTOG — hipertensos (mg/dL)")
-
+#===============================================================================
 # 8.2 Funcao de formatacao: recebe uma tabela de dados e devolve
 # uma tabela pronta para inserir no Word. Nao realiza testes estatisticos.
 # Cabecalho azul, fonte Arial, bordas discretas e largura ajustada a pagina.
@@ -63,7 +67,7 @@ formatar_tabela <- function(x) {
   ft <- paginate(ft, init = FALSE, hdr_ftr = TRUE)
   return(ft)
 }
-
+#===============================================================================
 # 8.3 Criar o documento e definir pagina A4 com margens de 2 cm.
 # As medidas de pagina e margens sao informadas em polegadas (cm / 2,54).
 doc <- read_docx()
@@ -79,7 +83,7 @@ doc <- body_add_par(doc, "Paulo Henrique de Almeida Soares Pimenta — NUSP: 759
 doc <- body_add_par(doc, "Fernanda Miwa Yamasaka — NUSP: 11923084")
 doc <- body_add_par(doc, paste("Participantes:", nrow(dados),
                                "| Homens:", nrow(homens), "| Mulheres:", nrow(mulheres)))
-
+#===============================================================================
 # 8.4 Tabela principal.
 doc <- body_add_par(doc, "1. Características da amostra", style = "heading 1")
 doc <- body_add_par(doc, paste(
@@ -96,7 +100,7 @@ doc <- body_add_par(doc, paste(
   "Há um p-valor por variável. Sexo define os grupos e não recebe teste.",
   "DP: desvio padrão. P25 e P75: percentis 25 e 75."
 ))
-
+#===============================================================================
 # 8.5 Tabela suplementar, em nova pagina.
 doc <- body_add_break(doc)
 doc <- body_add_par(doc, "2. Medidas e métodos estatísticos", style = "heading 1")
@@ -107,7 +111,7 @@ doc <- body_add_par(doc, paste(
   "não determina a escolha do teste de comparação."
 ))
 doc <- body_add_flextable(doc, value = formatar_tabela(suplementar_word))
-
+#===============================================================================
 # 8.6 Intervalos de confianca, usando os valores calculados nos itens 5 e 6.
 doc <- body_add_break(doc)
 doc <- body_add_par(doc, "3. Intervalos de confiança", style = "heading 1")
@@ -120,7 +124,7 @@ doc <- body_add_par(doc, paste(
   "As categorias Primeiro Grau, Segundo Grau e Graduado foram interpretadas",
   "como ao menos primeiro grau completo."
 ))
-
+#===============================================================================
 # 8.7 Estatisticas solicitadas no item 7.
 doc <- body_add_par(doc, "4. Estatísticas descritivas adicionais", style = "heading 1")
 doc <- body_add_flextable(doc, value = formatar_tabela(item7_word))
@@ -138,7 +142,7 @@ doc <- body_add_par(doc, paste(
   "Resultados não significativos não demonstram equivalência entre grupos.",
   "A generalização depende do desenho amostral e do mecanismo de ausência dos dados."
 ))
-
+#===============================================================================
 # 8.8 Salvar. print() grava o objeto doc como arquivo .docx.
 # Feche o arquivo no Word antes de executar novamente esta linha.
 print(doc, target = "EP01_relatorio.docx")
