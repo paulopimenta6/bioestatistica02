@@ -130,3 +130,17 @@ dados$META_HDL[which(dados$SEXO == "F")] <- 50
 # [9] Verificar se o participante está dentro da meta de colesterol.
 #===============================================================================
 dados$DLP_NA_META <- (dados$LDL < dados$META_LDL & dados$HDL > dados$META_HDL)
+#head(dados[, c("IDADE", "SEXO", "DIABETES", "HPDAC", "LDL", "HDL", "META_LDL", "META_HDL", "DLP_NA_META")], n = 15)
+#===============================================================================
+# [10] Definir a conduta para dislipidemia.
+#===============================================================================
+# Inicialmente, deixar a conduta de dislipidemia desconhecida.
+dados$CONDUTA_DLP <- NA
+#===============================================================================
+# [10.1] Dentro das duas metas: manter conduta.
+#===============================================================================
+dados$CONDUTA_DLP[which(dados$DLP_NA_META == TRUE)] <- "manter conduta"
+#===============================================================================
+# [10.2] LDL mais de 30 acima OU HDL mais de 10 abaixo do limite:
+# introduzir medicamento.
+#===============================================================================
