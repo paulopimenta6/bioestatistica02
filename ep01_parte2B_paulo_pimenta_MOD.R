@@ -130,17 +130,57 @@ dados$META_HDL[which(dados$SEXO == "F")] <- 50
 # [9] Verificar se o participante está dentro da meta de colesterol.
 #===============================================================================
 dados$DLP_NA_META <- (dados$LDL < dados$META_LDL & dados$HDL > dados$META_HDL)
-#head(dados[, c("IDADE", "SEXO", "DIABETES", "HPDAC", "LDL", "HDL", "META_LDL", "META_HDL", "DLP_NA_META")], n = 15)
+#head(dados[, c("IDADE", "SEXO", "DIABETES", "HPDAC", "LDL", "HDL", "META_LDL", "META_HDL", "DLP_NA_META")], n = 50)
 #===============================================================================
 # [10] Definir a conduta para dislipidemia.
 #===============================================================================
 # Inicialmente, deixar a conduta de dislipidemia desconhecida.
 dados$CONDUTA_DLP <- NA
 #===============================================================================
-# [10.1] Dentro das duas metas: manter conduta.
+# [10.1] Dentro das duas metas: "manter conduta"
 #===============================================================================
 dados$CONDUTA_DLP[which(dados$DLP_NA_META == TRUE)] <- "manter conduta"
 #===============================================================================
-# [10.2] LDL mais de 30 acima OU HDL mais de 10 abaixo do limite:
-# introduzir medicamento.
+# [10.2] Excesso de LDL > 30 OU déficit de HDL > 10: "introduzir medicamento"
 #===============================================================================
+dados$CONDUTA_DLP[which(
+  dados$DLP_NA_META == FALSE &
+  ((dados$LDL - dados$META_LDL > 30) |
+    (dados$META_HDL - dados$HDL > 10))
+)] <- "introduzir medicamento"
+#===============================================================================
+# [10.3] Fora da meta, com excesso de LDL <= 30 e déficit de HDL <= 10. "orientar dieta e atividade física"
+#===============================================================================
+dados$CONDUTA_DLP[which(
+  dados$DLP_NA_META == FALSE &
+    (dados$LDL - dados$META_LDL <= 30) &
+    (dados$META_HDL - dados$HDL <= 10)
+)] <- "orientar dieta e atividade física"
+#===============================================================================
+# Conferência dos resultados das orientações
+#===============================================================================
+head(dados[, c("LDL", "HDL", "META_LDL", "META_HDL", "DLP_NA_META", "CONDUTA_DLP")], n = 50)
+table(dados$CONDUTA_DLP, useNA = "ifany")
+#===============================================================================
+# [11] Conferir o banco e as três condutas.
+#===============================================================================
+# Confirmar que todos os participantes continuam no banco.
+nrow(dados)
+# Conferir cada conduta, incluindo os valores ausentes.
+table(dados$CONDUTA_HAS, useNA = "ifany")
+table(dados$CONDUTA_DM, useNA = "ifany")
+table(dados$CONDUTA_DLP, useNA = "ifany")
+#===============================================================================
+# [12] Exportar o banco original com as novas variáveis.
+#===============================================================================
+write.csv(
+  dados,
+  file = "banco_EP2B.csv",
+  row.names = FALSE,
+  na = "NA",
+  fileEncoding = "UTF-8"
+)
+# Confirmar que o arquivo foi criado.
+file.exists("banco_EP2B.csv")
+# Mostrar a pasta onde ele foi salvo.
+getwd()
