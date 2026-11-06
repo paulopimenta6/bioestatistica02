@@ -81,6 +81,7 @@ doc <- body_add_par(doc, "Exercício-programa 1", style = "heading 1")
 doc <- body_add_par(doc, "Análise descritiva e inferência estatística", style = "heading 2")
 doc <- body_add_par(doc, "Paulo Henrique de Almeida Soares Pimenta — NUSP: 7599770")
 doc <- body_add_par(doc, "Fernanda Miwa Yamasaka — NUSP: 11923084")
+doc <- body_add_par(doc, "Rebeca Benevides Pinto — NUSP: 15305032")
 doc <- body_add_par(doc, paste("Participantes:", nrow(dados),
                                "| Homens:", nrow(homens), "| Mulheres:", nrow(mulheres)))
 #===============================================================================
